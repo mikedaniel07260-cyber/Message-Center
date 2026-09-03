@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Message Center</title>
+        <style>
+            *{
+                box-sizing:border-box
+            }
+            body{
+                margin:0;
+                font-family:Arial;
+                background:#eef2f7;
+                color:#172033
+            }
+            .container{
+                width:95%;
+                max-width:1000px;
+                margin:30px auto
+            }
+            .card{
+                background:white;
+                padding:25px;
+                border-radius:15px;
+                margin-bottom:20px;
+                box-shadow:0 5px 20px #0001
+            }
+            input,textarea{
+                width:100%;
+                padding:12px;
+                margin:6px 0 15px;
+                border:1px solid #ccd5df;
+                border-radius:8px
+            }
+            button{
+                padding:10px 15px;
+                border:0;
+                border-radius:7px;
+                background:#2563eb;
+                color:white;
+                cursor:pointer
+            }
+            .delete{
+                background:#dc2626
+            }
+            .message{
+                padding:18px;
+                background:#f5f7fa;
+                border-radius:10px;
+                margin:10px 0;
+                border-left:4px solid #2563eb
+            }
+            .unread{
+                border-left-color:#f59e0b
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="card">
+                <h1>📩 Contact</h1>
+                <form id="form">
+                    <input id="name" required placeholder="Nom">
+                    <input id="email" type="email" required placeholder="Email">
+                    <input id="subject" required placeholder="Sujet">
+                    <textarea id="body" required placeholder="Message"></textarea>
+                    <button>
+                        Envoyer
+                    </button>
+                </form>
+            </div>
+            <div class="card">
+                <h2>Boîte de réception</h2>
+                <div id="inbox"></div>
+            </div>
+        </div>
+        <script>
+            let messages=JSON.parse(localStorage.getItem("messages")||"[]");
+            form.addEventListener("submit",e=>{
+                e.preventDefault();
+                messages.unshift({id:Date.now(),name:name.value,email:email.value,subject:subject.value,body:body.value,read:false,date:new Date().toLocaleString("fr-FR")});
+                save();
+                form.reset();
+                render();
+            });
+            function save(){
+                localStorage.setItem("messages",JSON.stringify(messages));
+            }
+            function readMessage(id){
+                let msg=messages.find(x=>x.id===id);
+                if(msg){
+                    msg.read=true;
+                    save();
+                    render();
+                }
+            }
+            function removeMessage(id){
+                messages=messages.filter(x=>x.id!==id);
+                save();
+                render();   
+            }
+            function render(){
+                if(messages.length===0){
+                    inbox.innerHTML="<p>Aucun message.</p>";
+                    return;
+                }
+                inbox.innerHTML=messages.map(m=>`
+                    <div class="message ${m.read?'':'unread'}">
+                        <strong>${m.subject}</strong>
+                        <p>De : ${m.name}(${m.email})</p>
+                        <p>${m.body}</p>
+                        <small>${m.date}</small>
+                        <br><br>
+                        <button onclick="readMessage(${m.id})">
+                            Marquer comme lu
+                        </button>
+                        <button class="delete"onclick="removeMessage(${m.id})">
+                            Supprimer
+                        </button>
+                    </div>
+                    `).join("");
+            }
+            render();
+        </script>
+    </body>
+</html>
